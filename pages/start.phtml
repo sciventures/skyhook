@@ -1,5 +1,5 @@
 <?php
-$title = 'Project Skyhook';
+$title = 'Bitmarket.ph ATM Powered by Project Skyhook';
 $styles = ['/assets/css/skyhook.css'];
 $classes = ['start'];
 include 'head.phtml';
@@ -9,9 +9,9 @@ include 'head.phtml';
 		background-image: url('<?= Localization::url('images/Bitcoin-Logo.png') ?>');
 	}
 </style>
-<a href="#" id="language-selector" class="button">
+<!--a href="#" id="language-selector" class="button">
 	<img src="<?= Localization::flagURL() ?>" alt="" />
-</a>
+</a-->
 <div id="help-panel">
 	<?= file_get_contents(Localization::path("help.html")); ?>
 	<a href="#" class="closer button">&times;</a>
