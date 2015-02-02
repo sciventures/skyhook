@@ -116,6 +116,7 @@ $result = $router->resolve(
 		['/price$', Router::lazyLoad('Controllers\Price')],
 		['/billscan-balance/:ticket$', Router::lazyLoad('Controllers\BillScannerBalance')],
 		['/email-receipt', Router::lazyLoad('Controllers\EmailReceipt')],
+		['/start-purchase/:address$', Router::lazyLoad('Controllers\Ajax\StartPurchase')],
 		
 		//Checks the known connectivity before any other routes are resolved.
 		['', Container::dispense('Controllers\ConnectivityChecker')],
@@ -123,7 +124,13 @@ $result = $router->resolve(
 		['/start$', Router::lazyLoad('Controllers\Start')],
 		['/account$', Router::lazyLoad('Controllers\Account')],
 		['/purchase/:address$', Router::lazyLoad('Controllers\StartPurchase')],
-		['', Router::lazyLoad('Controllers\Start')],
+		['/bust$', Router::lazyLoad('Controllers\CacheBust')],
+		['/?$', Router::lazyLoad('Controllers\Start')],
+		['', function () {
+			header('HTTP/1.1 404 Not Found.');
+			echo '404 Not Found.';
+			return true;
+		}]
 	]
 );
 
