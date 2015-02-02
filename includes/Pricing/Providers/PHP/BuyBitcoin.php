@@ -27,7 +27,7 @@ class BuyBitcoin implements PricingProvider {
 	}
 	
 	public function getTickerURL() {
-		return 'https://buybitcoin.ph/api/ticker';
+		return 'http://api.buybitcoin.ph/rates';
 	}
 }
 
