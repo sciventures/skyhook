@@ -30,4 +30,3 @@ class CoinXchange implements PricingProvider {
 		return 'https://www.coinxchange.ph/api/v1/quotes';
 	}
 }
-

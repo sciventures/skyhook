@@ -54,30 +54,15 @@ class Blockchain implements \WalletProvider {
 	}
 	
 	public function getBalance($confirmations = 1) {
-		$request = 'https://blockchain.info/unspent?' . http_build_query([
-			'active' => $this->fromAddress->get()
-		]);
-		
 		try {
-			$get = SimpleHTTP::get($request);
+			$am = new BlockchainAddressMonitor($this->fromAddress, true);
+			$am->updateCache();
+			$balance = $am->getBalance($confirmations);
 		} catch (Exception $e) {
-			throw new Exception("There was a network error while processing the request.");
-		}
-		
-		$decoded = JSON::decode($get);
-		$balance = new Amount('0');
-		
-		foreach ($decoded['unspent_outputs'] as $output) {
-			if (!empty($output['confirmations'])
-			&& $output['confirmations'] >= $confirmations) {
-				$balance = $balance->add(Amount::fromSatoshis(
-					$output['value']
-				));
+			if (strtolower($e->getMessage()) === "no free outputs to spend") {
+				return new Amount("0");
 			}
-		}
-		
-		if (isset($decoded['error'])) {
-			throw new Exception('Blockchain.info responded with: ' . $decoded['error']);
+			throw new Exception("There was a network error while processing the request.");
 		}
 		
 		return $balance;
@@ -90,6 +75,10 @@ class Blockchain implements \WalletProvider {
 			$this->id,
 			$this->fromAddress
 		);
+	}
+	
+	public function getWalletAddress() {
+		return $this->fromAddress;
 	}
 	
 	public function sendTransaction(BitcoinAddress $to, Amount $howMuch) {

@@ -13,15 +13,18 @@ use JSON;
 use Template;
 use DB;
 use BitcoinAddress;
-use BillScanner;
 use Purchase;
+use BillScannerDriver;
+use Controllers\BalanceCacheUpdater;
 
 class FinalizePurchase implements Controller {
+	use BalanceCacheUpdater;
+	
 	public function execute(array $matches, $url, $rest) {
 		$admin = Admin::volatileLoad();
 		$cfg = $admin->getConfig();
 		$db = Container::dispense('DB');
-		$scanner = new BillScanner();
+		$scanner = new BillScannerDriver();
 		
 		$ticket = Purchase::load($cfg, $db, intval($matches['ticket']));
 		$response = [];
@@ -43,12 +46,11 @@ class FinalizePurchase implements Controller {
 			return true;
 		}
 		
-		if ($scanner->isRunning()) {
-			$scanner->stop();
-		}
+		$scanner->stop();
 		
 		try {
 			Purchase::completeTransaction($cfg, $db, $ticket);
+			$this->notifyBalanceChange();
 			$response['proceed'] = true;
 		} catch (Exception $e) {
 			if ($e instanceof InsufficientFundsException) {
@@ -65,6 +67,7 @@ class FinalizePurchase implements Controller {
 				'PurchaseError',
 				['purchase_id' => $ticket->getId()]
 			);
+			$this->notifyBalanceChange();
 		}
 		
 		echo JSON::encode($response);
